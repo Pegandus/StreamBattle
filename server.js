@@ -10,9 +10,6 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // ─── DATABASE SETUP ───────────────────────────────────────────────────
-const fs = require('fs');
-
-// Ensure "db" folder exists
 const dbDir = path.join(__dirname, 'db');
 
 if (!fs.existsSync(dbDir)) {
