@@ -762,7 +762,7 @@ function computeStats(times){
   for(let i=0;i<iv.length-1;i++) pairs.push(iv[i]+iv[i+1]);
   if(!pairs.length) return {avgBpm:0,ur:0};
   const avgPair=pairs.reduce((a,b)=>a+b,0)/pairs.length;
-  const avgBpm=(60000/avgPair)/2;
+  const avgBpm = 60000 / (avgPair * 2);
   const mean=iv.reduce((a,b)=>a+b,0)/iv.length;
   const variance=iv.reduce((a,b)=>a+(b-mean)**2,0)/iv.length;
   const ur=Math.sqrt(variance)*10/mean*10;
