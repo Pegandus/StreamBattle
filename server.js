@@ -3,13 +3,25 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 // ─── DATABASE SETUP ───────────────────────────────────────────────────
-const db = new Database(path.join(__dirname, 'db', 'streambattle.db'));
+const fs = require('fs');
+
+// Ensure "db" folder exists
+const dbDir = path.join(__dirname, 'db');
+
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+// Create/open database safely
+const dbPath = path.join(dbDir, 'streambattle.db');
+const db = new Database(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS scores (
