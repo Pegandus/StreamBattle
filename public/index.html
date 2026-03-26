@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamBattle — Competitive BPM</title>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#ff66aa;--pink-dark:#cc3377;--pink-glow:#ff66aa22;
+  --bg:#0d0d12;--bg2:#14141e;--bg3:#1a1a28;--bg4:#20202e;
+  --border:#ffffff14;--border2:#ff66aa44;
+  --text:#f0f0f8;--text2:#9090b0;--text3:#505070;
+  --green:#44ff88;--yellow:#ffcc44;--red:#ff4466;--blue:#44aaff;
+  --font-display:'Teko',sans-serif;--font-body:'Inter',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;padding:20px;flex-direction:column;align-items:center}
+.screen.active{display:flex}
+
+/* TYPOGRAPHY */
+.logo{font-family:var(--font-display);font-size:52px;font-weight:700;letter-spacing:2px;line-height:1}
+.logo span{color:var(--pink)}
+.tagline{font-size:12px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;margin-top:6px}
+h2.sec{font-family:var(--font-display);font-size:30px;font-weight:700;margin-bottom:16px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-accent{border-color:var(--border2)}
+
+/* BUTTONS */
+.btn{font-family:var(--font-display);font-size:20px;font-weight:600;letter-spacing:1px;
+  padding:11px 28px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--pink);color:#000}
+.btn-primary:hover{background:#ff88bb;transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0) scale(.97)}
+.btn-outline{background:transparent;color:var(--pink);border:1px solid var(--pink)}
+.btn-outline:hover{background:var(--pink-glow)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+.btn-green{background:var(--green);color:#000}
+.btn-green:hover{filter:brightness(1.1)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid #ff446644}
+.btn-danger:hover{background:#ff446618}
+.btn-sm{font-size:16px;padding:8px 18px}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;filter:none!important}
+.btn-full{width:100%;justify-content:center}
+
+/* INPUTS */
+input[type=text]{background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  font-family:var(--font-body);font-size:15px;padding:11px 14px;border-radius:8px;
+  outline:none;transition:border .15s;width:100%}
+input[type=text]:focus{border-color:var(--pink)}
+
+/* NAV */
+.nav{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:960px;
+  margin-bottom:20px;padding:10px 18px;background:var(--bg2);border-radius:10px;border:1px solid var(--border)}
+.nav-left{display:flex;align-items:center;gap:16px}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px}
+.nav-user{font-size:13px;color:var(--text2)}
+.nav-user strong{color:var(--pink)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:8px;padding:4px;margin-bottom:24px}
+.tab{font-family:var(--font-display);font-size:18px;padding:8px 22px;border-radius:6px;
+  cursor:pointer;color:var(--text2);transition:all .15s;border:none;background:transparent}
+.tab.active{background:var(--pink);color:#000;font-weight:600}
+.tab-badge{background:var(--red);color:#fff;font-size:11px;padding:1px 6px;border-radius:99px;
+  font-family:var(--font-body);font-weight:600;margin-left:4px;vertical-align:middle}
+
+/* PLAY LAYOUT */
+.play-layout{display:flex;gap:20px;width:100%;max-width:960px;flex-wrap:wrap}
+.play-main{flex:1;min-width:300px;display:flex;flex-direction:column;gap:14px}
+.play-side{width:260px;display:flex;flex-direction:column;gap:14px}
+
+/* CHALLENGE LIST */
+.challenge-row{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;background:var(--bg3);border-radius:8px;cursor:pointer;
+  border:1px solid transparent;transition:all .15s}
+.challenge-row:hover{border-color:var(--border2);background:var(--bg4)}
+.challenge-row.selected{border-color:var(--pink);background:var(--bg4)}
+.ch-bpm{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--pink)}
+.ch-info{font-size:12px;color:var(--text3);margin-top:2px}
+.diff{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.diff-easy{background:#44ff8820;color:var(--green)}.diff-med{background:#ffcc4420;color:var(--yellow)}.diff-hard{background:#ff446620;color:var(--red)}
+.pb-tag{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* BPM METER */
+.bpm-meter{text-align:center;padding:28px 20px}
+.bpm-val{font-family:var(--font-display);font-size:100px;font-weight:700;line-height:1;transition:color .2s}
+.bpm-lbl{font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase}
+.prog-wrap{background:var(--bg4);border-radius:4px;height:6px;overflow:hidden;margin:10px 0 4px}
+.prog-fill{height:100%;border-radius:4px;background:var(--pink);transition:width .1s linear}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text3)}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{background:var(--bg3);border-radius:8px;padding:12px}
+.stat-k{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.stat-v{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text)}
+
+/* KEY DISPLAY */
+.key-row{display:flex;gap:10px}
+.key-box{flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:8px;
+  padding:14px;text-align:center;transition:all .08s}
+.key-box.hit{background:var(--pink-glow);border-color:var(--pink);transform:scale(.94)}
+.key-name{font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--pink)}
+.key-lbl{font-size:11px;color:var(--text3);margin-bottom:4px}
+
+/* TARGET */
+.target-card{text-align:center;padding:20px;background:var(--bg3);border-radius:10px;border:1px solid var(--border2)}
+.target-v{font-family:var(--font-display);font-size:72px;font-weight:700;color:var(--pink);line-height:1}
+
+/* LEADERBOARD */
+.lb-wrap{width:100%;max-width:760px}
+.lb-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.lb-filter-btns{display:flex;gap:6px;flex-wrap:wrap}
+.lb-filter-btn{font-family:var(--font-display);font-size:16px;padding:6px 16px;border-radius:6px;
+  cursor:pointer;color:var(--text2);background:var(--bg3);border:1px solid var(--border);transition:all .15s}
+.lb-filter-btn.active{background:var(--pink);color:#000;border-color:var(--pink)}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;
+  padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.lb-table td{padding:12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}
+.lb-table tr:hover td{background:var(--bg2)}
+.lb-rank{font-family:var(--font-display);font-size:20px;font-weight:700;width:36px;color:var(--text3)}
+.gold{color:#ffd700}.silver{color:#c0c0c0}.bronze{color:#cd7f32}
+.lb-name{font-weight:600}.lb-name.me{color:var(--pink)}
+.lb-bpm{font-family:var(--font-display);font-size:22px;color:var(--pink);font-weight:700}
+.lb-grade{font-family:var(--font-display);font-size:18px;font-weight:700}
+.lb-ur{font-size:12px;color:var(--text3)}
+.lb-online{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px}
+
+/* DUEL */
+.duel-wrap{width:100%;max-width:780px;display:flex;flex-direction:column;gap:18px}
+.duel-vs{display:flex;gap:16px;align-items:stretch}
+.duel-player{flex:1;border-radius:10px;padding:20px;text-align:center;border:1px solid var(--border)}
+.duel-player.you{border-color:var(--border2);background:var(--bg2)}
+.duel-player.opp{background:var(--bg2)}
+.duel-pname{font-family:var(--font-display);font-size:24px;font-weight:700;margin-bottom:6px}
+.duel-bpm{font-family:var(--font-display);font-size:64px;font-weight:700;line-height:1}
+.duel-ur{font-size:12px;color:var(--text3);margin-top:4px}
+.duel-sep{font-family:var(--font-display);font-size:36px;color:var(--text3);display:flex;align-items:center}
+.vs-bar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--text2)}
+.vs-bar-outer{flex:1;background:var(--bg4);border-radius:4px;height:5px;overflow:hidden}
+.vs-bar-fill{height:100%;border-radius:4px;transition:width .2s}
+.status-pill{display:inline-block;font-size:12px;font-weight:600;padding:4px 14px;border-radius:99px;letter-spacing:.5px}
+.pill-waiting{background:#ffcc4420;color:var(--yellow);border:1px solid #ffcc4440}
+.pill-live{background:#44ff8820;color:var(--green);border:1px solid #44ff8840}
+.pill-done{background:#ff66aa20;color:var(--pink);border:1px solid var(--border2)}
+
+/* INVITE TOAST */
+.invite-toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:12px;padding:18px 22px;min-width:280px;z-index:200;
+  animation:slideIn .25s ease;box-shadow:0 8px 40px #00000088}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast-title{font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:4px}
+.toast-sub{font-size:13px;color:var(--text2);margin-bottom:14px}
+.toast-btns{display:flex;gap:8px}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:#00000099;display:flex;align-items:center;
+  justify-content:center;z-index:300}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;
+  padding:32px;max-width:440px;width:90%;text-align:center}
+.modal-grade{font-family:var(--font-display);font-size:100px;font-weight:700;line-height:1}
+.modal-title{font-family:var(--font-display);font-size:32px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:16px}
+.stat-row-m{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.stat-row-m:last-child{border:none}
+.stat-row-m .k{color:var(--text2)}.stat-row-m .v{font-family:var(--font-display);font-size:18px;font-weight:700}
+.modal-btns{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+
+/* ONLINE SIDEBAR */
+.online-list{display:flex;flex-direction:column;gap:6px}
+.online-item{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 10px;background:var(--bg3);border-radius:6px;font-size:13px}
+.online-name{color:var(--text)}
+.online-name.me{color:var(--pink)}
+
+/* MISC */
+.hidden{display:none!important}
+.flex{display:flex}.flex-col{flex-direction:column}
+.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}
+.w-full{width:100%}.text-center{text-align:center}
+.text-pink{color:var(--pink)}.text-muted{color:var(--text2);font-size:13px}.text-green{color:var(--green)}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--pink);
+  border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:620px){
+  .play-side{width:100%}.logo{font-size:38px}.bpm-val{font-size:72px}
+  .duel-vs{flex-direction:column}.duel-sep{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HOME / LOGIN
+════════════════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:28px;max-width:460px;width:100%;padding-top:80px">
+    <div class="text-center">
+      <div class="logo">Stream<span>Battle</span></div>
+      <div class="tagline">Competitive BPM Challenge</div>
+    </div>
+    <div class="card card-accent w-full">
+      <div class="text-muted" style="margin-bottom:10px">Enter your username to play</div>
+      <input type="text" id="username-input" placeholder="YourName" maxlength="20" autocomplete="off" />
+      <div id="login-error" class="hidden" style="color:var(--red);font-size:13px;margin-top:8px"></div>
+      <button class="btn btn-primary btn-full mt-16" id="login-btn" onclick="login()">Enter the Arena</button>
+    </div>
+    <div class="text-muted text-center" style="font-size:12px;line-height:1.8">
+      Tap Z + X alternately to match the target BPM.<br>
+      Challenge real players to live 1v1 duels.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════════════════════ -->
+<div id="screen-main" class="screen">
+  <div class="nav">
+    <div class="nav-left">
+      <div class="logo" style="font-size:24px">Stream<span>Battle</span></div>
+      <div class="nav-user"><span class="online-dot"></span>Playing as <strong id="nav-username"></strong></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:12px;color:var(--text3)" id="online-count"></span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="play" onclick="switchTab('play',this)">Play</button>
+    <button class="tab" data-tab="leaderboard" onclick="switchTab('leaderboard',this)">Leaderboard</button>
+    <button class="tab" data-tab="duel" onclick="switchTab('duel',this)">Duel <span id="duel-badge" class="tab-badge hidden">1</span></button>
+  </div>
+
+  <!-- ──────────── PLAY TAB ──────────── -->
+  <div id="tab-play" class="w-full" style="max-width:960px">
+    <div class="play-layout">
+      <div class="play-main">
+
+        <!-- Challenge selector -->
+        <div class="card">
+          <div style="font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Choose Challenge</div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="challenge-list"></div>
+        </div>
+
+        <!-- BPM Meter -->
+        <div class="card bpm-meter">
+          <div class="bpm-lbl">current bpm</div>
+          <div class="bpm-val" id="bpm-display" style="color:var(--text3)">—</div>
+          <div class="prog-wrap"><div class="prog-fill" id="time-bar" style="width:0%"></div></div>
+          <div class="prog-row">
+            <span id="time-left">—</span>
+            <span id="test-status">Select a challenge</span>
+          </div>
+        </div>
+
+        <!-- Keys -->
+        <div class="key-row">
+          <div class="key-box" id="kb0"><div class="key-lbl">Key 1</div><div class="key-name" id="kn0">Z</div></div>
+          <div class="key-box" id="kb1"><div class="key-lbl">Key 2</div><div class="key-name" id="kn1">X</div></div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" style="flex:1;justify-content:center" id="start-btn" onclick="startTest()" disabled>Start</button>
+          <button class="btn btn-danger btn-sm hidden" id="stop-btn" onclick="stopTest()">Stop</button>
+        </div>
+
+      </div>
+      <div class="play-side">
+
+        <!-- Target -->
+        <div class="target-card">
+          <div style="font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Target BPM</div>
+          <div class="target-v" id="target-display">—</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-k">Taps</div><div class="stat-v" id="s-taps">0</div></div>
+          <div class="stat-box"><div class="stat-k">Avg BPM</div><div class="stat-v" id="s-avg">—</div></div>
+          <div class="stat-box"><div class="stat-k">Peak BPM</div><div class="stat-v" id="s-peak">—</div></div>
+          <div class="stat-box"><div class="stat-k">Unstable Rate</div><div class="stat-v" id="s-ur">—</div></div>
+        </div>
+
+        <!-- Key config -->
+        <div class="card">
+          <div style="font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Key Bindings</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:10px;align-items:center">
+              <span style="font-size:13px;color:var(--text2);width:44px">Key 1</span>
+              <input type="text" id="k1in" value="z" maxlength="1" style="width:56px;text-align:center;font-family:var(--font-display);font-size:22px;text-transform:uppercase" />
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <span style="font-size:13px;color:var(--text2);width:44px">Key 2</span>
+              <input type="text" id="k2in" value="x" maxlength="1" style="width:56px;text-align:center;font-family:var(--font-display);font-size:22px;text-transform:uppercase" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Online players -->
+        <div class="card">
+          <div style="font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Online Now</div>
+          <div class="online-list" id="online-sidebar"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── LEADERBOARD TAB ──────────── -->
+  <div id="tab-leaderboard" class="lb-wrap hidden">
+    <div class="lb-filters">
+      <div class="lb-filter-btns" id="lb-filter-btns">
+        <button class="lb-filter-btn active" onclick="filterLB('all',this)">All</button>
+        <button class="lb-filter-btn" onclick="filterLB(160,this)">160 BPM</button>
+        <button class="lb-filter-btn" onclick="filterLB(180,this)">180 BPM</button>
+        <button class="lb-filter-btn" onclick="filterLB(200,this)">200 BPM</button>
+        <button class="lb-filter-btn" onclick="filterLB(220,this)">220 BPM</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3)" id="lb-updated"></div>
+    </div>
+    <div id="lb-loading" style="text-align:center;padding:40px;color:var(--text3)"><div class="spinner"></div> Loading...</div>
+    <table class="lb-table hidden" id="lb-table">
+      <thead><tr><th>#</th><th>Player</th><th>BPM</th><th>UR</th><th>Grade</th><th>Challenge</th></tr></thead>
+      <tbody id="lb-body"></tbody>
+    </table>
+    <div id="lb-empty" class="hidden text-center" style="padding:40px;color:var(--text3)">No scores yet. Be the first!</div>
+  </div>
+
+  <!-- ──────────── DUEL TAB ──────────── -->
+  <div id="tab-duel" class="duel-wrap hidden">
+
+    <!-- Setup -->
+    <div id="duel-setup">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+
+        <!-- Challenge specific player -->
+        <div class="card" style="flex:1;min-width:260px">
+          <h2 class="sec">Challenge Player</h2>
+          <div class="text-muted" style="margin-bottom:12px">Enter their username to send a duel invite.</div>
+          <input type="text" id="duel-opp-input" placeholder="Username" />
+          <button class="btn btn-primary btn-full mt-12" onclick="sendChallenge()">Send Challenge</button>
+        </div>
+
+        <!-- Quick match -->
+        <div class="card" style="flex:1;min-width:260px">
+          <h2 class="sec">Quick Match</h2>
+          <div class="text-muted" style="margin-bottom:12px">Get matched with any online player for the selected challenge.</div>
+          <div id="qm-status" class="hidden" style="text-align:center;padding:12px 0">
+            <div class="spinner"></div>
+            <div style="font-size:13px;color:var(--text2);margin-top:8px">Searching for opponent…</div>
+            <button class="btn btn-danger btn-sm mt-12" onclick="cancelQM()">Cancel</button>
+          </div>
+          <div id="qm-btn-wrap">
+            <button class="btn btn-green btn-full" id="qm-btn" onclick="quickMatch()" disabled>Find Match</button>
+            <div class="text-muted mt-8" style="font-size:12px">Select a challenge in Play tab first</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Online players to challenge -->
+      <div class="card mt-16">
+        <div style="font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Online Players</div>
+        <div id="duel-online-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div id="duel-online-empty" class="text-muted hidden">No other players online right now.</div>
+      </div>
+    </div>
+
+    <!-- Active duel arena -->
+    <div id="duel-arena" class="hidden">
+      <div style="text-align:center;margin-bottom:12px">
+        <span class="status-pill pill-waiting" id="duel-status-pill">Waiting…</span>
+      </div>
+      <div class="duel-vs">
+        <div class="duel-player you">
+          <div class="duel-pname text-pink" id="d-you-name">You</div>
+          <div class="duel-bpm text-pink" id="d-you-bpm">—</div>
+          <div class="duel-ur" id="d-you-ur">UR —</div>
+        </div>
+        <div class="duel-sep">VS</div>
+        <div class="duel-player opp">
+          <div class="duel-pname" id="d-opp-name">Opponent</div>
+          <div class="duel-bpm" style="color:var(--text2)" id="d-opp-bpm">—</div>
+          <div class="duel-ur" id="d-opp-ur">UR —</div>
+        </div>
+      </div>
+      <div class="vs-bar mt-12">
+        <span id="d-you-pct" style="min-width:40px">—</span>
+        <div class="vs-bar-outer"><div class="vs-bar-fill" id="d-you-bar" style="background:var(--pink);width:0%"></div></div>
+        <div class="vs-bar-outer"><div class="vs-bar-fill" id="d-opp-bar" style="background:var(--text2);width:0%"></div></div>
+        <span id="d-opp-pct" style="min-width:40px;text-align:right">—</span>
+      </div>
+      <div class="card mt-12" style="text-align:center">
+        <div style="font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase">Target</div>
+        <div style="font-family:var(--font-display);font-size:48px;color:var(--pink)" id="d-target">—</div>
+        <div class="prog-wrap"><div class="prog-fill" id="d-time-bar" style="width:100%"></div></div>
+        <div style="font-size:12px;color:var(--text3)" id="d-time-left">—</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-primary" style="flex:1;justify-content:center" id="duel-start-btn" onclick="beginDuelTapping()" disabled>Tap to Play</button>
+        <button class="btn btn-danger btn-sm" onclick="leaveDuel()">Leave</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODALS & TOASTS
+════════════════════════════════════════════════════════════ -->
+
+<!-- Result modal -->
+<div class="modal-bg hidden" id="modal-result">
+  <div class="modal">
+    <div class="modal-grade" id="m-grade">S</div>
+    <div class="modal-title" id="m-title">Test Complete</div>
+    <div class="modal-sub" id="m-sub"></div>
+    <div class="card" style="text-align:left;margin-top:12px">
+      <div class="stat-row-m"><span class="k">Avg BPM</span><span class="v" id="m-avg">—</span></div>
+      <div class="stat-row-m"><span class="k">Target BPM</span><span class="v" id="m-target">—</span></div>
+      <div class="stat-row-m"><span class="k">Unstable Rate</span><span class="v" id="m-ur">—</span></div>
+      <div class="stat-row-m"><span class="k">Score</span><span class="v" id="m-score">—</span></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="closeResult()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Duel result modal -->
+<div class="modal-bg hidden" id="modal-duel-result">
+  <div class="modal">
+    <div class="modal-grade" id="dm-grade">W</div>
+    <div class="modal-title" id="dm-title">You Win!</div>
+    <div class="card" style="text-align:left;margin-top:12px">
+      <div class="stat-row-m"><span class="k">Your BPM</span><span class="v text-pink" id="dm-you">—</span></div>
+      <div class="stat-row-m"><span class="k">Opponent BPM</span><span class="v" id="dm-opp">—</span></div>
+      <div class="stat-row-m"><span class="k">Your UR</span><span class="v" id="dm-ur">—</span></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="closeDuelResult()">Back to Lobby</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invite toast container -->
+<div id="toast-container"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let socket;
+let username = '';
+let key1 = 'z', key2 = 'x';
+let keyDown = {0:false, 1:false};
+let lastKey = -1;
+let tapTimes = [];
+let testActive = false;
+let testTimer = null;
+let selectedChallenge = null;
+let testDuration = 10;
+let peakBPM = 0;
+
+// Duel state
+let currentRoom = null;
+let duelTarget = 0;
+let duelTapping = false;
+let duelTimer = null;
+let duelStart = null;
+let duelYouTaps = [];
+let duelOppName = '';
+let pendingDuelRoom = null;
+let pendingInvites = 0;
+
+const CHALLENGES = [
+  {bpm:160, dur:10, label:'Warmup',   diff:'easy'},
+  {bpm:180, dur:10, label:'Standard', diff:'med'},
+  {bpm:200, dur:10, label:'Intense',  diff:'hard'},
+  {bpm:220, dur:10, label:'Extreme',  diff:'hard'},
+];
+
+const gradeColor = {SS:'#ffd700', S:'var(--pink)', A:'var(--green)', B:'var(--yellow)', C:'#ff8844', D:'var(--red)'};
+
+// ══════════════════════════════════════════════════════════════
+//  LOGIN / LOGOUT
+// ══════════════════════════════════════════════════════════════
+function login(){
+  const v = document.getElementById('username-input').value.trim();
+  if(!v){ showLoginError('Please enter a username.'); return; }
+  if(v.length < 2){ showLoginError('Username must be at least 2 characters.'); return; }
+  username = v;
+  document.getElementById('nav-username').textContent = username;
+  showScreen('screen-main');
+  buildChallenges();
+  initSocket();
+  document.addEventListener('keydown', onKD);
+  document.addEventListener('keyup', onKU);
+  document.getElementById('k1in').addEventListener('keydown', e=>{e.preventDefault();const k=e.key.toLowerCase();if(k.length===1){key1=k;e.target.value=k;updateKeyLabels();}});
+  document.getElementById('k2in').addEventListener('keydown', e=>{e.preventDefault();const k=e.key.toLowerCase();if(k.length===1){key2=k;e.target.value=k;updateKeyLabels();}});
+}
+document.getElementById('username-input').addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
+function showLoginError(m){ const el=document.getElementById('login-error'); el.textContent=m; el.classList.remove('hidden'); }
+function logout(){
+  if(testActive) stopTest();
+  if(socket) socket.disconnect();
+  document.removeEventListener('keydown', onKD);
+  document.removeEventListener('keyup', onKU);
+  showScreen('screen-home');
+  switchTab('play', document.querySelector('.tab'));
+  document.getElementById('duel-badge').classList.add('hidden');
+  pendingInvites = 0;
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SOCKET
+// ══════════════════════════════════════════════════════════════
+function initSocket(){
+  socket = io();
+
+  socket.on('connect', ()=>{
+    socket.emit('register', username);
+    socket.emit('get_leaderboard');
+    socket.emit('get_online');
+  });
+
+  socket.on('leaderboard_data', rows => { renderLB(rows); });
+  socket.on('leaderboard_update', rows => { renderLB(rows); });
+
+  socket.on('online_list', list => { renderOnline(list); });
+
+  socket.on('score_saved', ()=>{ socket.emit('get_leaderboard'); });
+
+  // ── Duel invite received ──
+  socket.on('duel_invite', ({roomId, challenger, opponent, target_bpm})=>{
+    if(opponent !== username) return;
+    pendingInvites++;
+    document.getElementById('duel-badge').textContent = pendingInvites;
+    document.getElementById('duel-badge').classList.remove('hidden');
+    showInviteToast(roomId, challenger, target_bpm);
+  });
+
+  socket.on('duel_declined', ({by})=>{
+    showToastMsg(`${by} declined your challenge.`);
+    resetDuelUI();
+  });
+
+  socket.on('duel_start', ({roomId, target, quickMatch})=>{
+    currentRoom = roomId;
+    duelTarget = target;
+    startDuelCountdown(quickMatch);
+  });
+
+  socket.on('opponent_bpm', ({username:opp, bpm, ur})=>{
+    document.getElementById('d-opp-bpm').textContent = bpm.toFixed(1);
+    document.getElementById('d-opp-ur').textContent = 'UR '+ur.toFixed(2);
+    const pct = Math.min(bpm/duelTarget*100,100);
+    document.getElementById('d-opp-bar').style.width = pct+'%';
+    document.getElementById('d-opp-pct').textContent = bpm.toFixed(0);
+  });
+
+  socket.on('opponent_finished', ()=>{
+    document.getElementById('d-opp-bpm').style.color = 'var(--green)';
+  });
+
+  socket.on('duel_over', ({winner, scores, players})=>{
+    clearTimeout(duelTimer);
+    duelTapping = false;
+    const won = winner === username;
+    const myScore = scores[username] || {};
+    const oppName = players.find(p=>p!==username);
+    const oppScore = scores[oppName] || {};
+    showDuelResult(won, myScore, oppScore);
+    resetDuelUI();
+    socket.emit('get_online');
+  });
+
+  socket.on('opponent_disconnected', ({username:opp})=>{
+    showToastMsg(`${opp} disconnected. You win by default!`);
+    clearTimeout(duelTimer);
+    duelTapping = false;
+    resetDuelUI();
+  });
+
+  socket.on('matchmaking_waiting', ()=>{
+    document.getElementById('qm-status').classList.remove('hidden');
+    document.getElementById('qm-btn-wrap').classList.add('hidden');
+  });
+
+  socket.on('matchmaking_cancelled', ()=>{
+    document.getElementById('qm-status').classList.add('hidden');
+    document.getElementById('qm-btn-wrap').classList.remove('hidden');
+  });
+
+  socket.on('challenge_error', ({message})=>{
+    showToastMsg(message);
+  });
+
+  // Refresh online list every 15s
+  setInterval(()=>{ if(socket.connected) socket.emit('get_online'); }, 15000);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════════════
+function switchTab(tab, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['play','leaderboard','duel'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+  });
+  if(tab==='leaderboard') socket && socket.emit('get_leaderboard');
+  if(tab==='duel'){ pendingInvites=0; document.getElementById('duel-badge').classList.add('hidden'); socket && socket.emit('get_online'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CHALLENGES
+// ══════════════════════════════════════════════════════════════
+function buildChallenges(){
+  const el = document.getElementById('challenge-list');
+  el.innerHTML = '';
+  CHALLENGES.forEach((ch, i)=>{
+    const d = document.createElement('div');
+    d.className = 'challenge-row';
+    d.id = 'ch-row-'+i;
+    d.innerHTML = `
+      <div>
+        <div><span class="ch-bpm">${ch.bpm}</span> <span style="font-size:13px;color:var(--text3)">BPM · ${ch.dur}s</span></div>
+        <div class="pb-tag" id="pb-${ch.bpm}">—</div>
+      </div>
+      <span class="diff diff-${ch.diff}">${ch.label}</span>`;
+    d.onclick = ()=>selectChallenge(i);
+    el.appendChild(d);
+  });
+}
+
+function selectChallenge(idx){
+  if(testActive) return;
+  selectedChallenge = CHALLENGES[idx];
+  document.querySelectorAll('.challenge-row').forEach((r,i)=>r.classList.toggle('selected', i===idx));
+  document.getElementById('target-display').textContent = selectedChallenge.bpm;
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('qm-btn').disabled = false;
+  document.getElementById('test-status').textContent = 'Ready — press Start or tap a key';
+  testDuration = selectedChallenge.dur;
+  resetStats();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  KEY HANDLING
+// ══════════════════════════════════════════════════════════════
+function onKD(e){
+  if(e.repeat) return;
+  if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  const k = e.key.toLowerCase();
+  let ki = -1;
+  if(k===key1) ki=0; else if(k===key2) ki=1;
+  if(ki===-1) return;
+  if(keyDown[ki]) return;
+  keyDown[ki]=true;
+  flashKey(ki);
+  if(ki===lastKey) return; // must alternate
+  lastKey=ki;
+  if(testActive){ tapTimes.push(Date.now()); updateLiveStats(); }
+  else if(selectedChallenge){ tapTimes.push(Date.now()); updateLiveStats(); if(tapTimes.length===1) autoStartTest(); }
+  if(duelTapping){ duelYouTaps.push(Date.now()); emitDuelBPM(); }
+}
+function onKU(e){
+  const k=e.key.toLowerCase();
+  if(k===key1) keyDown[0]=false; else if(k===key2) keyDown[1]=false;
+}
+function flashKey(ki){
+  const b=document.getElementById('kb'+ki);
+  b.classList.add('hit');
+  setTimeout(()=>b.classList.remove('hit'), 80);
+}
+function updateKeyLabels(){
+  document.getElementById('kn0').textContent=key1.toUpperCase();
+  document.getElementById('kn1').textContent=key2.toUpperCase();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TEST
+// ══════════════════════════════════════════════════════════════
+function autoStartTest(){
+  testActive=true;
+  const start=Date.now();
+  document.getElementById('start-btn').classList.add('hidden');
+  document.getElementById('stop-btn').classList.remove('hidden');
+  document.getElementById('test-status').textContent='Tapping…';
+  testTimer=setTimeout(finishTest, testDuration*1000);
+  const tick=()=>{
+    if(!testActive) return;
+    const pct=Math.min((Date.now()-start)/testDuration/1000,1);
+    document.getElementById('time-bar').style.width=(pct*100)+'%';
+    const left=Math.max(0,testDuration-(Date.now()-start)/1000);
+    document.getElementById('time-left').textContent=left.toFixed(1)+'s';
+    if(left>0) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function startTest(){
+  if(!selectedChallenge) return;
+  tapTimes=[]; peakBPM=0; lastKey=-1;
+  resetStats();
+  document.getElementById('test-status').textContent='Tap now!';
+}
+
+function stopTest(){
+  if(!testActive) return;
+  clearTimeout(testTimer);
+  testActive=false;
+  document.getElementById('start-btn').classList.remove('hidden');
+  document.getElementById('stop-btn').classList.add('hidden');
+  tapTimes=[]; peakBPM=0;
+  resetStats();
+  document.getElementById('test-status').textContent='Stopped';
+  document.getElementById('bpm-display').textContent='—';
+  document.getElementById('bpm-display').style.color='var(--text3)';
+  document.getElementById('time-bar').style.width='0%';
+}
+
+function finishTest(){
+  testActive=false;
+  document.getElementById('start-btn').classList.remove('hidden');
+  document.getElementById('stop-btn').classList.add('hidden');
+  if(tapTimes.length<4){ document.getElementById('test-status').textContent='Too few taps — try again'; return; }
+  const {avgBpm,ur}=computeStats(tapTimes);
+  const score=computeScore(avgBpm,selectedChallenge.bpm,ur);
+  const grade=getGrade(score);
+  const entry={target_bpm:selectedChallenge.bpm,avg_bpm:+avgBpm.toFixed(2),ur:+ur.toFixed(3),score,grade:grade.label};
+  socket && socket.emit('submit_score', entry);
+  showResultModal(entry, grade, score);
+  document.getElementById('test-status').textContent='Done!';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LIVE STATS
+// ══════════════════════════════════════════════════════════════
+function computeStats(times){
+  if(times.length<2) return {avgBpm:0,ur:0};
+  const iv=[];
+  for(let i=1;i<times.length;i++) iv.push(times[i]-times[i-1]);
+  const pairs=[];
+  for(let i=0;i<iv.length-1;i++) pairs.push(iv[i]+iv[i+1]);
+  if(!pairs.length) return {avgBpm:0,ur:0};
+  const avgPair=pairs.reduce((a,b)=>a+b,0)/pairs.length;
+  const avgBpm=60000/avgPair;
+  const mean=iv.reduce((a,b)=>a+b,0)/iv.length;
+  const variance=iv.reduce((a,b)=>a+(b-mean)**2,0)/iv.length;
+  const ur=Math.sqrt(variance)*10/mean*10;
+  return {avgBpm,ur};
+}
+
+function updateLiveStats(){
+  if(tapTimes.length<2) return;
+  const {avgBpm,ur}=computeStats(tapTimes);
+  const bel=document.getElementById('bpm-display');
+  bel.textContent=avgBpm.toFixed(1);
+  const diff=Math.abs(avgBpm-(selectedChallenge?.bpm||180));
+  bel.style.color=diff<5?'var(--green)':diff<15?'var(--yellow)':'var(--red)';
+  if(avgBpm>peakBPM) peakBPM=avgBpm;
+  document.getElementById('s-taps').textContent=tapTimes.length;
+  document.getElementById('s-avg').textContent=avgBpm.toFixed(1);
+  document.getElementById('s-peak').textContent=peakBPM.toFixed(1);
+  document.getElementById('s-ur').textContent=ur.toFixed(2);
+}
+
+function resetStats(){
+  tapTimes=[]; peakBPM=0; lastKey=-1;
+  document.getElementById('s-taps').textContent='0';
+  ['s-avg','s-peak','s-ur'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('time-bar').style.width='0%';
+  document.getElementById('time-left').textContent='—';
+  document.getElementById('bpm-display').textContent='—';
+  document.getElementById('bpm-display').style.color='var(--text3)';
+}
+
+function computeScore(avgBpm,target,ur){
+  const acc=Math.max(0,1-Math.abs(avgBpm-target)/target);
+  const urP=Math.max(0,1-ur/30);
+  return Math.round(acc*urP*10000);
+}
+
+function getGrade(score){
+  if(score>=9500) return {label:'SS',color:'#ffd700'};
+  if(score>=9000) return {label:'S',color:'var(--pink)'};
+  if(score>=8000) return {label:'A',color:'var(--green)'};
+  if(score>=6000) return {label:'B',color:'var(--yellow)'};
+  if(score>=4000) return {label:'C',color:'#ff8844'};
+  return {label:'D',color:'var(--red)'};
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RESULT MODAL
+// ══════════════════════════════════════════════════════════════
+function showResultModal(entry, grade, score){
+  const m=document.getElementById('modal-result');
+  const g=document.getElementById('m-grade');
+  g.textContent=grade.label; g.style.color=grade.color;
+  document.getElementById('m-title').textContent='Test Complete';
+  document.getElementById('m-sub').textContent=`Challenge: ${entry.target_bpm} BPM`;
+  document.getElementById('m-avg').textContent=entry.avg_bpm+' BPM';
+  document.getElementById('m-target').textContent=entry.target_bpm+' BPM';
+  document.getElementById('m-ur').textContent=entry.ur;
+  document.getElementById('m-score').textContent=score.toLocaleString();
+  m.classList.remove('hidden');
+}
+function closeResult(){ document.getElementById('modal-result').classList.add('hidden'); }
+
+// ══════════════════════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════════════════════
+let lbData = [];
+let lbFilter = 'all';
+
+function filterLB(val, btn){
+  lbFilter=val;
+  document.querySelectorAll('.lb-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered=lbFilter==='all'?lbData:lbData.filter(r=>r.target_bpm===lbFilter);
+  drawLB(filtered);
+  socket && socket.emit('get_leaderboard', lbFilter!=='all'?lbFilter:undefined);
+}
+
+function renderLB(rows){
+  lbData=rows;
+  document.getElementById('lb-loading').classList.add('hidden');
+  document.getElementById('lb-updated').textContent='Updated just now';
+  const filtered=lbFilter==='all'?rows:rows.filter(r=>r.target_bpm===lbFilter);
+  drawLB(filtered);
+}
+
+function drawLB(rows){
+  const table=document.getElementById('lb-table');
+  const empty=document.getElementById('lb-empty');
+  if(!rows.length){ table.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+  table.classList.remove('hidden'); empty.classList.add('hidden');
+  const tbody=document.getElementById('lb-body');
+  tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const rank=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const grade=getGrade(r.score);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="lb-rank ${rank}">${i+1}</td>
+      <td class="lb-name ${r.username===username?'me':''}">${r.username===username?'★ ':''} ${r.username}</td>
+      <td class="lb-bpm">${(+r.avg_bpm).toFixed(1)}</td>
+      <td class="lb-ur">${(+r.ur).toFixed(2)}</td>
+      <td class="lb-grade" style="color:${grade.color}">${r.grade}</td>
+      <td style="font-size:13px;color:var(--text3)">${r.target_bpm} BPM</td>`;
+    tbody.appendChild(tr);
+  });
+  // Update PBs
+  const myRows=rows.filter(r=>r.username===username);
+  myRows.forEach(r=>{
+    const el=document.getElementById('pb-'+r.target_bpm);
+    if(el) el.textContent='PB '+parseFloat(r.avg_bpm).toFixed(1)+' BPM';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ONLINE LIST
+// ══════════════════════════════════════════════════════════════
+function renderOnline(list){
+  const count = list.length;
+  document.getElementById('online-count').textContent = count+' online';
+  const sidebar=document.getElementById('online-sidebar');
+  sidebar.innerHTML='';
+  list.slice(0,8).forEach(name=>{
+    const d=document.createElement('div');
+    d.className='online-item';
+    d.innerHTML=`<span class="online-name ${name===username?'me':''}">${name===username?'You':name}</span>
+      ${name!==username?`<button class="btn btn-outline btn-sm" style="padding:4px 12px;font-size:14px" onclick="quickChallenge('${name}')">⚔</button>`:''}`;
+    sidebar.appendChild(d);
+  });
+
+  // Duel tab online list
+  const duelOnline=document.getElementById('duel-online-list');
+  const duelEmpty=document.getElementById('duel-online-empty');
+  const others=list.filter(n=>n!==username);
+  duelOnline.innerHTML='';
+  if(!others.length){ duelEmpty.classList.remove('hidden'); return; }
+  duelEmpty.classList.add('hidden');
+  others.forEach(name=>{
+    const btn=document.createElement('button');
+    btn.className='btn btn-outline btn-sm';
+    btn.textContent='⚔ '+name;
+    btn.onclick=()=>{ document.getElementById('duel-opp-input').value=name; sendChallenge(); };
+    duelOnline.appendChild(btn);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DUEL
+// ══════════════════════════════════════════════════════════════
+function sendChallenge(){
+  const opp=document.getElementById('duel-opp-input').value.trim();
+  if(!opp || opp===username){ showToastMsg('Enter a valid opponent username.'); return; }
+  if(!selectedChallenge){ showToastMsg('Select a challenge in the Play tab first!'); return; }
+  socket.emit('challenge', {opponent:opp, target_bpm:selectedChallenge.bpm});
+  showToastMsg(`Challenge sent to ${opp}… waiting for response.`);
+}
+
+function quickChallenge(name){
+  document.querySelector('[data-tab="duel"]').click();
+  document.getElementById('duel-opp-input').value=name;
+}
+
+function quickMatch(){
+  if(!selectedChallenge){ showToastMsg('Select a challenge first!'); return; }
+  socket.emit('quick_match', {target_bpm:selectedChallenge.bpm});
+}
+function cancelQM(){
+  socket.emit('cancel_quick_match', {target_bpm:selectedChallenge?.bpm});
+}
+
+function showInviteToast(roomId, challenger, target_bpm){
+  const id='toast-'+roomId;
+  const container=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className='invite-toast'; t.id=id;
+  t.innerHTML=`
+    <div class="toast-title">⚔ Duel Invite!</div>
+    <div class="toast-sub"><strong style="color:var(--pink)">${challenger}</strong> challenged you · ${target_bpm} BPM</div>
+    <div class="toast-btns">
+      <button class="btn btn-primary btn-sm" onclick="acceptDuel('${roomId}','${challenger}',${target_bpm})">Accept</button>
+      <button class="btn btn-danger btn-sm" onclick="declineDuel('${roomId}')">Decline</button>
+    </div>`;
+  container.appendChild(t);
+}
+
+function acceptDuel(roomId, challenger, target_bpm){
+  removeToast('toast-'+roomId);
+  currentRoom=roomId;
+  duelOppName=challenger;
+  duelTarget=target_bpm;
+  socket.emit('accept_duel', {roomId});
+  document.querySelector('[data-tab="duel"]').click();
+}
+
+function declineDuel(roomId){
+  removeToast('toast-'+roomId);
+  socket.emit('decline_duel', {roomId});
+}
+
+function removeToast(id){
+  const el=document.getElementById(id);
+  if(el) el.remove();
+}
+
+function startDuelCountdown(quickMatch){
+  document.getElementById('duel-setup').classList.add('hidden');
+  document.getElementById('duel-arena').classList.remove('hidden');
+  document.getElementById('d-you-name').textContent=username;
+  document.getElementById('d-opp-name').textContent=duelOppName||'Opponent';
+  document.getElementById('d-target').textContent=duelTarget+' BPM';
+  document.getElementById('d-you-bpm').textContent='—';
+  document.getElementById('d-opp-bpm').textContent='—';
+  document.getElementById('duel-status-pill').textContent=quickMatch?'Quick Match found!':'Duel accepted!';
+  document.getElementById('duel-status-pill').className='status-pill pill-waiting';
+
+  // Countdown 3…2…1
+  let count=3;
+  document.getElementById('duel-start-btn').textContent='Starting in '+count+'…';
+  const cd=setInterval(()=>{
+    count--;
+    if(count<=0){
+      clearInterval(cd);
+      document.getElementById('duel-start-btn').disabled=false;
+      document.getElementById('duel-start-btn').textContent='Tap Now!';
+      document.getElementById('duel-status-pill').textContent='LIVE';
+      document.getElementById('duel-status-pill').className='status-pill pill-live';
+      beginDuelTapping();
+    } else {
+      document.getElementById('duel-start-btn').textContent='Starting in '+count+'…';
+    }
+  },1000);
+}
+
+function beginDuelTapping(){
+  if(duelTapping) return;
+  duelTapping=true;
+  duelYouTaps=[];
+  tapTimes=[];
+  lastKey=-1;
+  duelStart=Date.now();
+  document.getElementById('duel-start-btn').disabled=true;
+  const dur=testDuration*1000;
+  duelTimer=setTimeout(finishDuel, dur);
+  const tick=()=>{
+    if(!duelTapping) return;
+    const pct=1-Math.min((Date.now()-duelStart)/dur,1);
+    document.getElementById('d-time-bar').style.width=(pct*100)+'%';
+    const left=Math.max(0,testDuration-(Date.now()-duelStart)/1000);
+    document.getElementById('d-time-left').textContent=left.toFixed(1)+'s remaining';
+    if(left>0) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function emitDuelBPM(){
+  if(duelYouTaps.length<2) return;
+  const {avgBpm,ur}=computeStats(duelYouTaps);
+  document.getElementById('d-you-bpm').textContent=avgBpm.toFixed(1);
+  document.getElementById('d-you-ur').textContent='UR '+ur.toFixed(2);
+  const pct=Math.min(avgBpm/duelTarget*100,100);
+  document.getElementById('d-you-bar').style.width=pct+'%';
+  document.getElementById('d-you-pct').textContent=avgBpm.toFixed(0);
+  socket.emit('duel_bpm_update', {roomId:currentRoom, bpm:+avgBpm.toFixed(1), ur:+ur.toFixed(2)});
+}
+
+function finishDuel(){
+  duelTapping=false;
+  if(duelYouTaps.length<4){
+    socket.emit('duel_result', {roomId:currentRoom,avg_bpm:0,ur:99,score:0,grade:'D'});
+    return;
+  }
+  const {avgBpm,ur}=computeStats(duelYouTaps);
+  const score=computeScore(avgBpm,duelTarget,ur);
+  const grade=getGrade(score);
+  socket.emit('duel_result', {roomId:currentRoom,avg_bpm:+avgBpm.toFixed(2),ur:+ur.toFixed(3),score,grade:grade.label});
+  document.getElementById('duel-status-pill').textContent='Done — waiting for result…';
+  document.getElementById('duel-status-pill').className='status-pill pill-done';
+}
+
+function leaveDuel(){
+  if(duelTapping) finishDuel();
+  clearTimeout(duelTimer);
+  duelTapping=false;
+  resetDuelUI();
+}
+
+function resetDuelUI(){
+  currentRoom=null; duelOppName='';
+  document.getElementById('duel-setup').classList.remove('hidden');
+  document.getElementById('duel-arena').classList.add('hidden');
+  document.getElementById('qm-status').classList.add('hidden');
+  document.getElementById('qm-btn-wrap').classList.remove('hidden');
+  duelYouTaps=[];
+  tapTimes=[]; lastKey=-1;
+}
+
+function showDuelResult(won, mine, opp){
+  const grade=document.getElementById('dm-grade');
+  grade.textContent=won?'W':'L';
+  grade.style.color=won?'var(--green)':'var(--red)';
+  document.getElementById('dm-title').textContent=won?'You Win!':'You Lose!';
+  document.getElementById('dm-you').textContent=(mine.avg_bpm||0).toFixed(1)+' BPM';
+  document.getElementById('dm-opp').textContent=(opp.avg_bpm||0).toFixed(1)+' BPM';
+  document.getElementById('dm-ur').textContent=(mine.ur||0).toFixed(2);
+  document.getElementById('modal-duel-result').classList.remove('hidden');
+}
+function closeDuelResult(){ document.getElementById('modal-duel-result').classList.add('hidden'); }
+
+// ══════════════════════════════════════════════════════════════
+//  TOAST NOTIFICATIONS
+// ══════════════════════════════════════════════════════════════
+function showToastMsg(msg){
+  const id='toast-msg-'+Date.now();
+  const container=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className='invite-toast'; t.id=id;
+  t.style.minWidth='200px';
+  t.innerHTML=`<div style="font-size:14px;color:var(--text2)">${msg}</div>`;
+  container.appendChild(t);
+  setTimeout(()=>{ const el=document.getElementById(id); if(el) el.remove(); }, 4000);
+}
+</script>
+</body>
+</html>
